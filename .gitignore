@@ -256,6 +256,14 @@ GEMINI_PRIVATE.md
 OPENAI_INTERNAL.md
 
 # =========================================================
+# OPERATIONAL DATA (Hardened)
+# =========================================================
+.sessions/
+*.log
+forensic_*.txt
+test_full_output.log
+
+# =========================================================
 # OPTIONAL — IGNORE ENTIRE AGENT / SKILL ECOSYSTEM
 # Uncomment if desired
 # =========================================================
