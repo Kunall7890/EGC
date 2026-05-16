@@ -278,9 +278,18 @@ test_full_output.log
 !pnpm-lock.yaml
 !requirements.txt
 !pyproject.toml
+!package.json
 !README.md
 !README.zh-CN.md
 !LICENSE
+!CONTRIBUTING.md
+!SECURITY.md
+!RULES.md
+
+# =========================================================
+# KEEP ENV TEMPLATE
+# =========================================================
+!.env.example
 
 # =========================================================
 # KEEP CORE DOCUMENTATION
@@ -314,8 +323,159 @@ test_full_output.log
 # KEEP INSTALLERS / ENTRYPOINTS
 # =========================================================
 !install.sh
+!install.ps1
 !run.sh
+!run.ps1
 !startup.py
+!bootstrap.py
+!egc.py
+!egc_dashboard.py
+
+# =========================================================
+# KEEP RUNTIME / MEMORY CODE
+# =========================================================
+!scripts/runtime/
+!scripts/runtime/**
+!scripts/memory/
+!scripts/memory/**
+
+# =========================================================
+# KEEP CORE STRUCTURE
+# =========================================================
+!scripts/
+!scripts/**
+!hooks/
+!hooks/**
+!commands/
+!commands/**
+!agents/
+!agents/**
+!skills/
+!skills/**
+!rules/
+!rules/**
+!schemas/
+!schemas/**
+!manifests/
+!manifests/**
+!examples/
+!examples/**
+!plugins/
+!plugins/**
+!internal/
+!internal/**
+!mcp-configs/
+!mcp-configs/*.json
+!legacy-command-shims/
+!legacy-command-shims/**
+
+# =========================================================
+# KEEP HARNESS ADAPTERS (per-IDE plugin manifests)
+# =========================================================
+!.codex-plugin/
+!.codex-plugin/**
+!.gemini-plugin/
+!.gemini-plugin/**
+!.opencode/
+!.opencode/**
+!.codebuddy/
+!.codebuddy/**
+!.kiro/
+!.kiro/**
+!.trae/
+!.trae/**
+!.github/
+!.github/**
+
+# =========================================================
+# KEEP CONFIG ROOT FILES
+# =========================================================
+!.markdownlint.json
+!.npmignore
+!.mcp.json
+!.tool-versions
+!.yarnrc.yml
+!VERSION
+!agent.yaml
+!commitlint.config.js
+!eslint.config.js
+
+# =========================================================
+# ADDITIONAL IGNORE PATTERNS
+# =========================================================
+reports/
+.test_sessions/
+
+.yarn/cache/
+.yarn/install-state.gz
+.yarn/build-state.yml
+.yarn/unplugged/
+.pnp.*
+
+.history/
+.ipynb_checkpoints/
+
+*.profraw
+*.profdata
+*.lcov
+lcov.info
+
+.npm/
+*.pid
+*.seed
+*.tsbuildinfo
+
+Pipfile.lock
+poetry.lock
+
+live_execution_test.py.log
+
+# =========================================================
+# RE-BLOCK BUILD ARTIFACTS INSIDE WHITELISTED PATHS
+# =========================================================
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/*.so
+**/.DS_Store
+**/Thumbs.db
+**/desktop.ini
+**/.mypy_cache/
+**/.pytest_cache/
+**/.ruff_cache/
+**/.coverage
+**/.coverage.*
+**/coverage/
+**/htmlcov/
+**/*.log
+**/*.tmp
+**/*.bak
+**/*.backup
+**/*.old
+**/*.orig
+**/*.rej
+**/*.swp
+**/*.swo
+
+.codex-plugin/cache/
+.gemini-plugin/cache/
+.opencode/cache/
+.codebuddy/cache/
+.kiro/cache/
+.trae/cache/
+
+**/node_modules/
+
+**/.venv/
+**/venv/
+**/env/
+
+**/dist/
+**/build/
+**/.next/
+**/.turbo/
+**/.cache/
 
 # =========================================================
 # END
