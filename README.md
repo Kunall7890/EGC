@@ -1,6 +1,6 @@
 # Everything Google Code
 
-![Everything Gemini Code — the performance system for AI agent harnesses](assets/hero.png)
+![Everything Google Code — the performance system for AI agent harnesses](assets/hero.png)
 
 [![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg?style=flat-square)]() [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE) [![Status](https://img.shields.io/badge/status-Production%20Candidate-2ea44f.svg?style=flat-square)]() [![Runtime](https://img.shields.io/badge/runtime-Hardened-2ea44f.svg?style=flat-square)]() [![Platform](https://img.shields.io/badge/platform-Cross--Platform-blue.svg?style=flat-square)]()
 [![Gemini Native](https://img.shields.io/badge/engine-Gemini%20Native-1a73e8.svg?style=flat-square)]() [![Claude Bridge](https://img.shields.io/badge/bridge-Claude-d97757.svg?style=flat-square)]() [![OpenAI Bridge](https://img.shields.io/badge/bridge-OpenAI-412991.svg?style=flat-square)]() [![Routing](https://img.shields.io/badge/routing-Multi--Provider-8a2be2.svg?style=flat-square)]()
@@ -47,7 +47,7 @@ Not just configs. EGC is a massive, production-grade system: skills, memory opti
 
 ## 🧠 Why EGC Exists
 
-AI code assistants often degrade into confusing text files and fragmented commands. **Everything Gemini Code (EGC)** fixes this by wrapping the Gemini AI ecosystem in a strict, observable, and professional engineering architecture. It transforms a standard AI assistant into a **managed team of cognitive workers**, monitored via a real-time dashboard.
+AI code assistants often degrade into confusing text files and fragmented commands. **Everything Google Code (EGC)** fixes this by wrapping the Gemini AI ecosystem in a strict, observable, and professional engineering architecture. It transforms a standard AI assistant into a **managed team of cognitive workers**, monitored via a real-time dashboard.
 
 ---
 

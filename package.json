@@ -17,15 +17,59 @@
   },
   "main": "scripts/egc.js",
   "bin": {
-    "egc": "scripts/egc.js"
+    "egc": "scripts/egc.js",
+    "egc-install": "scripts/install-apply.js"
   },
   "scripts": {
     "test": "node tests/run-all.js",
     "test:state-store": "node tests/lib/state-store.test.js",
     "test:hooks": "node tests/hooks/hooks.test.js",
     "doctor": "node scripts/doctor.js",
-    "bootstrap": "node scripts/bootstrap-state-db.js"
+    "bootstrap": "node scripts/bootstrap-state-db.js",
+    "build:opencode": "node scripts/build-opencode.js",
+    "prepack": "npm run build:opencode"
   },
+  "files": [
+    "scripts/",
+    "src/",
+    "agents/",
+    "commands/",
+    "hooks/",
+    "skills/",
+    "rules/",
+    "schemas/",
+    "manifests/",
+    "internal/",
+    "plugins/",
+    "mcp-configs/",
+    "legacy-command-shims/",
+    "examples/",
+    ".gemini-plugin/",
+    ".codex-plugin/",
+    ".opencode/",
+    ".codebuddy/",
+    ".kiro/",
+    ".trae/",
+    ".agents/",
+    ".mcp.json",
+    "agent.yaml",
+    "VERSION",
+    "bootstrap.py",
+    "startup.py",
+    "egc.py",
+    "egc_dashboard.py",
+    "install.sh",
+    "install.ps1",
+    "run.sh",
+    "run.ps1",
+    "pyproject.toml",
+    "requirements.txt",
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTING.md",
+    "RULES.md",
+    "SECURITY.md"
+  ],
   "dependencies": {
     "ajv": "^8.12.0",
     "argparse": "^2.0.1",
@@ -45,6 +89,10 @@
     "orchestration"
   ],
   "devDependencies": {
-    "@eslint/js": "^10.0.1"
+    "@eslint/js": "^10.0.1",
+    "@iarna/toml": "^2.2.5",
+    "@types/node": "^20.0.0",
+    "globals": "^15.0.0",
+    "typescript": "^5.3.0"
   }
 }

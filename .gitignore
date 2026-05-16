@@ -150,9 +150,31 @@ state/
 .openai/
 .anthropic/
 .mcp/
+.runtime/
+.egc_prefix_snapshots/
 agents-runtime/
 runtime-cache/
 runtime_state/
+
+# =========================================================
+# PRIVATE INTERNAL AUDITS — NEVER PUBLISH
+# These holds forensic reports, runtime audits, risk reports,
+# maintainer-only blocker analysis. They MUST NOT enter any
+# commit, push, release, npm pack, or public artifact.
+# Mirror these rules in .npmignore.
+# =========================================================
+.reports/
+.forensics/
+.internal/
+.runtime-audits/
+.audit/
+.audits/
+docs/private-audits/
+docs/_internal/
+docs/_private/
+docs/forensics/
+docs/audits/
+docs/runtime-audits/
 
 # =========================================================
 # COGNITIVE / FORENSIC OUTPUTS
@@ -242,10 +264,16 @@ security_dumps/
 # LARGE GENERATED DOCUMENTATION
 # =========================================================
 docs/generated/
-docs/runtime/
 docs/reports/
 docs/forensics/
 docs/tmp/
+# docs/runtime/ holds public engineering reference (command-agent maps,
+# session-adapter contracts). Block generated dumps inside it while keeping
+# tracked .md specifications shippable in a clean clone.
+docs/runtime/*.log
+docs/runtime/*.json
+docs/runtime/dump-*
+docs/runtime/trace-*
 
 # =========================================================
 # PRIVATE AI DOCUMENTS

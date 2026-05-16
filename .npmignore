@@ -6,3 +6,23 @@ scripts/release.sh
 
 # Plugin dev notes (not needed by consumers)
 .gemini-plugin/PLUGIN_SCHEMA_NOTES.md
+
+# =========================================================
+# PRIVATE INTERNAL AUDITS — NEVER PUBLISH
+# These directories hold forensic reports / maintainer-only
+# audit material. They MUST NOT enter any npm pack output,
+# release tarball, or published artifact. Mirror of the
+# matching .gitignore section.
+# =========================================================
+.reports/
+.forensics/
+.internal/
+.runtime-audits/
+.audit/
+.audits/
+docs/private-audits/
+docs/_internal/
+docs/_private/
+docs/forensics/
+docs/audits/
+docs/runtime-audits/

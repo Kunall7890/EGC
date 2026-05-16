@@ -148,10 +148,12 @@ commands:
   - build-fix
   - checkpoint
   - code-review
+  - cost-report
   - cpp-build
   - cpp-review
   - cpp-test
   - evolve
+  - fastapi-review
   - feature-dev
   - flutter-build
   - flutter-review
@@ -185,7 +187,10 @@ commands:
   - multi-plan
   - multi-workflow
   - plan
+  - plan-prd
   - pm2
+  - pr
+  - project-init
   - projects
   - promote
   - prp-commit
@@ -204,6 +209,7 @@ commands:
   - rust-test
   - santa-loop
   - save-session
+  - security-scan
   - sessions
   - setup-pm
   - skill-create

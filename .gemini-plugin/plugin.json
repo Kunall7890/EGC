@@ -23,12 +23,6 @@
     "best-practices"
   ],
   "mcpServers": {},
-  "agents": {
-    "test": {
-      "description": "Test subagent",
-      "instructions": "agents/test.md"
-    }
-  },
   "skills": [
     "./skills/ai/",
     "./skills/architecture/",
