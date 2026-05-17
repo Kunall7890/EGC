@@ -250,7 +250,6 @@ function main() {
     // Prefer canonical entry over legacy alias
     const hasCanonical = entry && typeof entry.command === 'string';
     const resolvedEntry = hasCanonical ? entry : legacyName ? existing[legacyName] : null;
-    // For URL-based servers (exa), check for url field instead of command
     const urlEntry = !resolvedEntry && entry && typeof entry.url === 'string' ? entry : null;
     const finalEntry = resolvedEntry || urlEntry;
     const resolvedLabel = hasCanonical ? name : legacyName || name;

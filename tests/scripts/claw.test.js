@@ -151,7 +151,6 @@ function runTests() {
       const skillContent = fs.readFileSync(
         path.join(skillsDir, name, 'SKILL.md'), 'utf8'
       );
-      // Check that at least part of each skill is present
       const firstLine = skillContent.split('\n').find(l => l.trim().length > 10);
       if (firstLine) {
         assert.ok(result.includes(firstLine.trim()),
@@ -185,8 +184,6 @@ function runTests() {
     const result = askGemini('sys', 'hist', 'msg');
     // Should return an error string, not throw
     assert.strictEqual(typeof result, 'string', 'Should return a string');
-    // If egc is not installed, we get an error message
-    // If egc IS installed, we get an actual response — both are valid
     assert.ok(result.length > 0, 'Should return non-empty result');
   })) passed++; else failed++;
 

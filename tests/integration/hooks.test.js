@@ -682,7 +682,6 @@ async function runTests() {
     const testDir = createTestDir();
     const transcriptPath = path.join(testDir, 'mixed-transcript.jsonl');
 
-    // Create transcript with both direct tool_use and nested assistant message formats
     const lines = [
       JSON.stringify({ type: 'user', content: 'Fix the login bug' }),
       JSON.stringify({ type: 'tool_use', name: 'Read', input: { file_path: 'src/auth.ts' } }),
@@ -874,7 +873,6 @@ async function runTests() {
       if (err.code !== 'EPIPE' && err.code !== 'EOF') throw err;
     });
 
-    // Build a string that will be truncated mid-JSON at 1MB
     const bigValue = 'x'.repeat(1200000);
     proc.stdin.write(`{"transcript_path":"/tmp/none","padding":"${bigValue}"}`);
     proc.stdin.end();

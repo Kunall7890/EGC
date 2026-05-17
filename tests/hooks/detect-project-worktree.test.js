@@ -164,7 +164,6 @@ test('detect-project.sh sets PROJECT_NAME and non-global PROJECT_ID for worktree
   const testDir = createTempDir();
 
   try {
-    // Create a "main" repo with git init so we have real git structures
     const mainRepo = path.join(testDir, 'main-repo');
     fs.mkdirSync(mainRepo, { recursive: true });
     execSync('git init', { cwd: mainRepo, stdio: 'pipe' });
@@ -180,15 +179,12 @@ test('detect-project.sh sets PROJECT_NAME and non-global PROJECT_ID for worktree
       }
     });
 
-    // Create a worktree-like directory with .git as a file
     const worktreeDir = path.join(testDir, 'my-worktree');
     fs.mkdirSync(worktreeDir, { recursive: true });
 
-    // Set up the worktree directory structure in the main repo
     const worktreesDir = path.join(mainRepo, '.git', 'worktrees', 'my-worktree');
     fs.mkdirSync(worktreesDir, { recursive: true });
 
-    // Create the gitdir file and commondir in the worktree metadata
     const mainGitDir = path.join(mainRepo, '.git');
     fs.writeFileSync(
       path.join(worktreesDir, 'commondir'),
@@ -199,7 +195,6 @@ test('detect-project.sh sets PROJECT_NAME and non-global PROJECT_ID for worktree
       fs.readFileSync(path.join(mainGitDir, 'HEAD'), 'utf8')
     );
 
-    // Write .git file in the worktree directory (this is what git worktree creates)
     fs.writeFileSync(
       path.join(worktreeDir, '.git'),
       `gitdir: ${worktreesDir}\n`

@@ -1239,7 +1239,6 @@ function runTests() {
   if (test('detectFromPackageJson handles array packageManager field gracefully', () => {
     const tmpDir = createTestDir();
     try {
-      // Write a malformed package.json with array instead of string
       fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({ packageManager: ['pnpm@8', 'yarn@3'] }));
       // Should not crash — try/catch in detectFromPackageJson catches TypeError
       const result = pm.getPackageManager({ projectDir: tmpDir });
@@ -1589,7 +1588,6 @@ function runTests() {
 
   if (test('getExecCommand with args={} bypasses SAFE_ARGS validation and coerces to "[object Object]"', () => {
     // package-manager.js line 334: `if (args && typeof args === 'string' && !SAFE_ARGS_REGEX.test(args))`
-    // When args is an object: typeof {} === 'object' (not 'string'), so the
     // SAFE_ARGS_REGEX check is entirely SKIPPED.\
     // Line 339: `args ? ' ' + args : ''` — object is truthy, so it reaches\
     // string concatenation which calls {}.toString() -> \"[object Object]\"\

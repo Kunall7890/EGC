@@ -1277,7 +1277,6 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('readStdinJson error handler is guarded by settled flag', () => {
-    // If 'end' fires first setting settled=true, then a late 'error' should be ignored
     // We test this by verifying the code structure works: send valid JSON, the end event
     // fires, settled=true, any late error is safely ignored
     const { execFileSync } = require('child_process');
@@ -1412,7 +1411,6 @@ function runTests() {
     const tmpDir = path.join(utils.getTempDir(), `egc-r84-findfiles-toctou-${Date.now()}`);
     fs.mkdirSync(tmpDir, { recursive: true });
 
-    // Create a real file and a broken symlink, both matching *.txt
     const realFile = path.join(tmpDir, 'real.txt');
     fs.writeFileSync(realFile, 'content');
     const brokenLink = path.join(tmpDir, 'broken.txt');

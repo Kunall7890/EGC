@@ -164,7 +164,6 @@ function runTests() {
     assert.strictEqual(result.code, 0, 'exit code should be 0');
     const output = parseOutput(result.stdout);
     assert.ok(output, 'should produce valid JSON output');
-    // When allowed, the hook passes through the raw input (no hookSpecificOutput)
     // OR if hookSpecificOutput exists, it must not be deny
     if (output.hookSpecificOutput) {
       assert.notStrictEqual(output.hookSpecificOutput.permissionDecision, 'deny',

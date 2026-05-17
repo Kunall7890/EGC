@@ -358,7 +358,6 @@ function resolveSessionAlias(aliasOrId) {
     return resolved.sessionPath;
   }
 
-  // If not an alias, return as-is (might be a session path)
   return aliasOrId;
 }
 

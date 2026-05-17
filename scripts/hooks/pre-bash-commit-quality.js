@@ -75,7 +75,6 @@ function findFileIssues(filePath) {
     lines.forEach((line, index) => {
       const lineNum = index + 1;
       
-      // Check for console.log
       if (line.includes('console.log') && !line.trim().startsWith('//') && !line.trim().startsWith('*')) {
         issues.push({
           type: 'console.log',
@@ -310,7 +309,6 @@ function evaluate(rawInput) {
       return { output: rawInput, exitCode: 0 };
     }
     
-    // Check if this is an amend (skip checks for amends to avoid blocking)
     if (command.includes('--amend')) {
       return { output: rawInput, exitCode: 0 };
     }

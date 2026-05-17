@@ -35,7 +35,6 @@ process.stdin.on("end", () => {
         process.stdout.write(data);
         process.exit(0);
       }
-      // Find nearest tsconfig.json by walking up (max 20 levels to prevent infinite loop)
       let dir = path.dirname(resolvedPath);
       const root = path.parse(dir).root;
       let depth = 0;

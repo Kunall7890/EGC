@@ -156,7 +156,6 @@ console.log('==========================================\n');
 
 if (test('stop hook removes accumulator file after reading it', () => {
   cleanAccumFile();
-  // Write a fake accumulator with a non-existent file so no real formatter runs
   fs.writeFileSync(getAccumFile(), '/nonexistent/file.ts\n', 'utf8');
   assert.ok(fs.existsSync(getAccumFile()), 'accumulator should exist before stop hook');
 

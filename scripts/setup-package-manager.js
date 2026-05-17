@@ -191,7 +191,6 @@ if (projectIdx !== -1) {
   process.exit(0);
 }
 
-// If just a package manager name is provided, set it globally
 const pmName = args[0];
 if (PACKAGE_MANAGERS[pmName]) {
   setGlobal(pmName);

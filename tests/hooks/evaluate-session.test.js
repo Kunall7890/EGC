@@ -186,7 +186,6 @@ function runTests() {
       min_session_length: 3
     }));
 
-    // Create 4 user messages (above threshold of 3, but below default of 10)
     const transcript = createTranscript(testDir, 4);
 
     // Run the script from the testDir so it finds config relative to script location
@@ -328,7 +327,6 @@ function runTests() {
     try {
       fs.writeFileSync(configPath, 'NOT VALID JSON {{{ corrupt data !!!', 'utf8');
 
-      // Create a transcript with 12 user messages (above default threshold of 10)
       const testDir = createTestDir();
       const transcript = createTranscript(testDir, 12);
       const result = runEvaluate({ transcript_path: transcript });
@@ -363,7 +361,6 @@ function runTests() {
 
   if (test('uses learned_skills_path from config with ~ expansion', () => {
     // evaluate-session.js lines 69-72:
-    //   if (config.learned_skills_path) {
     //     learnedSkillsPath = config.learned_skills_path.replace(/^~/, require('os').homedir());
     //   }
     // This branch was never tested — only the parse error (Round 85) and default path.

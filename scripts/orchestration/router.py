@@ -97,7 +97,6 @@ class AGENT_ROUTER:
         Resolves a slug to physical agent metadata from runtime-map.json.
         Ignores virtual aliases.
         """
-        # Ensure slug ends with .md for matching name in runtime-map
         filename = f"{slug}.md" if not slug.endswith(".md") else slug
         
         for agent in self.runtime_map.get("agents", []):

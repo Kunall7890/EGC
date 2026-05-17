@@ -1376,7 +1376,6 @@ src/main.ts
     const realFile = '2026-02-10-abcd1234-session.tmp';
     fs.writeFileSync(path.join(sessionsDir, realFile), '# Real session\n');
 
-    // Create a broken symlink that matches the session filename pattern
     const brokenSymlink = '2026-02-10-deadbeef-session.tmp';
     fs.symlinkSync('/nonexistent/path/that/does/not/exist', path.join(sessionsDir, brokenSymlink));
 
@@ -1413,7 +1412,6 @@ src/main.ts
     const sessionsDir = path.join(isoHome, '.gemini', 'sessions');
     fs.mkdirSync(sessionsDir, { recursive: true });
 
-    // Create a broken symlink that matches a session ID pattern
     const brokenFile = '2026-02-11-deadbeef-session.tmp';
     fs.symlinkSync('/nonexistent/target/that/does/not/exist', path.join(sessionsDir, brokenFile));
 
@@ -1426,7 +1424,6 @@ src/main.ts
       delete require.cache[require.resolve('../../scripts/lib/utils')];
       const freshSM = require('../../scripts/lib/session-manager');
 
-      // Search by the short ID "deadbeef" — should match the broken symlink
       const result = freshSM.getSessionById('deadbeef');
       assert.strictEqual(result, null,
         'Should return null when matching session file is a broken symlink');
@@ -1469,7 +1466,6 @@ src/main.ts
     const realFile = '2026-02-11-abcd1234-session.tmp';
     fs.writeFileSync(path.join(sessionsDir, realFile), '# Test session');
 
-    // Create a subdirectory inside sessions dir — should be skipped by !entry.isFile()
     const subdir = path.join(sessionsDir, 'some-nested-dir');
     fs.mkdirSync(subdir);
 
@@ -1868,7 +1864,6 @@ file.ts
     fs.mkdirSync(isoSessionsDir, { recursive: true });
     const validName = '2026-03-01-abcd1234-session.tmp';
     fs.writeFileSync(path.join(isoSessionsDir, validName), '# Valid Session');
-    // Create non-session .tmp files that don't match the expected pattern
     fs.writeFileSync(path.join(isoSessionsDir, 'notes.tmp'), 'personal notes');
     fs.writeFileSync(path.join(isoSessionsDir, 'scratch.tmp'), 'scratch data');
     fs.writeFileSync(path.join(isoSessionsDir, 'backup-2026.tmp'), 'backup');
@@ -2463,7 +2458,6 @@ file.ts
     // ### delimiter still works — lazy match stops at ### In Progress
     assert.ok(meta1.completed.length >= 1,
       'Completed section should find at least 1 item with ### boundary on CRLF');
-    // Check that Task A is found (may include \r in the trimmed text)
     const taskA = meta1.completed[0];
     assert.ok(taskA.includes('Task A'),
       'Should extract Task A from completed section');

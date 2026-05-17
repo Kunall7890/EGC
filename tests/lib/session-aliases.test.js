@@ -683,7 +683,6 @@ function runTests() {
   console.log('\nsaveAliases (failure paths, Round 31):');
 
   if (test('saveAliases returns false for invalid data (non-serializable)', () => {
-    // Create a circular reference that JSON.stringify cannot handle
     const circular = { aliases: {}, metadata: {} };
     circular.self = circular;
     const result = aliases.saveAliases(circular);
@@ -691,7 +690,6 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('saveAliases handles writing to read-only directory gracefully', () => {
-    // Save current aliases, verify data is still intact after failed save attempt
     resetAliases();
     aliases.setAlias('safe-data', '/path/safe');
     const before = aliases.loadAliases();
@@ -719,7 +717,6 @@ function runTests() {
     resetAliases();
     aliases.setAlias('rename-src', '/path/session');
 
-    // Load aliases, modify them to make saveAliases fail on the SECOND call
     // by injecting a circular reference after the rename is done
     const data = aliases.loadAliases();
     assert.ok(data.aliases['rename-src'], 'Source alias should exist');
@@ -894,7 +891,6 @@ function runTests() {
   if (test('loadAliases backfills missing version and metadata fields', () => {
     resetAliases();
     const aliasesPath = aliases.getAliasesPath();
-    // Write a file with valid aliases but NO version and NO metadata
     fs.writeFileSync(aliasesPath, JSON.stringify({
       aliases: {
         'backfill-test': {
@@ -999,7 +995,6 @@ function runTests() {
       const freshAliases = require('../../scripts/lib/session-aliases');
 
       freshAliases.setAlias('title-save-fail', '/path/session', 'Original Title');
-      // Verify no leftover .tmp/.bak
       const ap = freshAliases.getAliasesPath();
       assert.ok(fs.existsSync(ap), 'Alias file should exist after setAlias');
 
@@ -1765,7 +1760,6 @@ function runTests() {
 
     const data = aliases.loadAliases();
 
-    // Verify __proto__ did NOT pollute Object.prototype
     const freshObj = {};
     assert.strictEqual(freshObj.sessionPath, undefined,
       'Object.prototype should NOT have sessionPath (no pollution)');
@@ -1785,7 +1779,6 @@ function runTests() {
     // resolveAlias with '__proto__' — rejected by regex (underscores ok but __ prefix works)
     // Actually ^[a-zA-Z0-9_-]+$ would ACCEPT '__proto__' since _ is allowed
     const resolved = aliases.resolveAlias('__proto__');
-    // If the regex accepts it, it should find the alias
     if (resolved) {
       assert.strictEqual(resolved.sessionPath, '/evil/path',
         'resolveAlias can access __proto__ alias (regex allows underscores)');

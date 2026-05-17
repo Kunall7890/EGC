@@ -110,7 +110,6 @@ function extractSessionSummary(transcriptPath) {
   };
 }
 
-// Read hook input from stdin (Gemini Code provides transcript_path via stdin JSON)
 const MAX_STDIN = 1024 * 1024;
 let stdinData = '';
 process.stdin.setEncoding('utf8');

@@ -36,7 +36,6 @@ function main() {
     env.PROJECT_ROOT = process.cwd();
   }
   
-  // Set PYTHONPATH so python can find the 'llm' package in 'src'
   env.PYTHONPATH = path.join(pluginRoot, 'src');
 
   const result = spawnSync(pythonBin, ['-m', 'llm.cli.prompt', ...args], {

@@ -239,7 +239,6 @@ function runTests() {
   if (test('falls back to ~/.gemini/ when nothing is found', () => {
     const homeDir = createTempDir();
     try {
-      // Create ~/.gemini but don't put scripts there
       fs.mkdirSync(path.join(homeDir, '.gemini'), { recursive: true });
       const result = resolveEccRoot({ envRoot: '', homeDir });
       assert.strictEqual(result, path.join(homeDir, '.gemini'));

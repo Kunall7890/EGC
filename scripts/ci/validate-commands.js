@@ -69,10 +69,8 @@ function validateCommands() {
   let hasErrors = false;
   let warnCount = 0;
 
-  // Build set of valid command names (without .md extension)
   const validCommands = new Set(files.map(f => f.replace(/\.md$/, '')));
 
-  // Build set of valid agent names (without .md extension)
   const validAgents = new Set();
   if (fs.existsSync(AGENTS_DIR)) {
     for (const f of fs.readdirSync(AGENTS_DIR)) {
@@ -124,7 +122,6 @@ function validateCommands() {
 
     // Check cross-references to other commands (e.g., `/build-fix`)
     // Skip lines that describe hypothetical output (e.g., "→ Creates: `/new-table`")
-    // Process line-by-line so ALL command refs per line are captured
     // (previous anchored regex /^.*`\/...`.*$/gm only matched the last ref per line)
     for (const line of contentNoCodeBlocks.split('\n')) {
       if (/creates:|would create:/i.test(line)) continue;

@@ -239,7 +239,6 @@ function runTests() {
   let failed = 0;
 
   // ==========================================
-  // validate-agents.js
   // ==========================================
   console.log('validate-agents.js:');
 
@@ -349,7 +348,6 @@ function runTests() {
   })) passed++; else failed++;
 
   // ==========================================
-  // validate-hooks.js
   // ==========================================
   console.log('\nvalidate-hooks.js:');
 
@@ -732,7 +730,6 @@ function runTests() {
   })) passed++; else failed++;
 
   // ==========================================
-  // validate-skills.js
   // ==========================================
   console.log('\nvalidate-skills.js:');
 
@@ -808,7 +805,6 @@ function runTests() {
   })) passed++; else failed++;
 
   // ==========================================
-  // validate-commands.js
   // ==========================================
   console.log('\nvalidate-commands.js:');
 
@@ -1044,7 +1040,6 @@ function runTests() {
   })) passed++; else failed++;
 
   // ==========================================
-  // validate-rules.js
   // ==========================================
   console.log('\nvalidate-rules.js:');
 
@@ -1613,7 +1608,6 @@ function runTests() {
     const skillsDir = createTestDir();
     fs.writeFileSync(path.join(testDir, 'cmd-a.md'), '# Command A\nBasic command.');
     fs.writeFileSync(path.join(testDir, 'cmd-b.md'), '# Command B\nBasic command.');
-    // Create a third command that references both on one line
     fs.writeFileSync(path.join(testDir, 'cmd-c.md'),
       '# Command C\nUse `/cmd-a` and `/cmd-b` together.');
 
@@ -1688,7 +1682,6 @@ function runTests() {
     const testDir = createTestDir();
     const agentsDir = createTestDir();
     const skillsDir = createTestDir();
-    // Create a command that references a skill via path (skills/name/) format
     // but the skill doesn't exist — should warn, not error
     fs.writeFileSync(path.join(testDir, 'cmd-a.md'),
       '# Command A\nSee skills/nonexistent-skill/ for details.');
@@ -1795,7 +1788,6 @@ function runTests() {
 
   if (test('skips directory entries even if named with .md extension', () => {
     const testDir = createTestDir();
-    // Create a directory named "tricky.md" — stat.isFile() should skip it
     fs.mkdirSync(path.join(testDir, 'tricky.md'));
     fs.writeFileSync(path.join(testDir, 'real.md'), '# A real rule');
 
@@ -2018,7 +2010,6 @@ function runTests() {
     const testDir = createTestDir();
     const skillDir = path.join(testDir, 'dir-skill');
     fs.mkdirSync(skillDir);
-    // Create SKILL.md as a DIRECTORY, not a file — existsSync returns true
     // but readFileSync throws EISDIR, exercising the catch block (lines 33-37)
     fs.mkdirSync(path.join(skillDir, 'SKILL.md'));
 
@@ -2472,7 +2463,6 @@ function runTests() {
     const testDir = createTestDir();
     const skillDir = path.join(testDir, 'empty-skill');
     fs.mkdirSync(skillDir, { recursive: true });
-    // Create SKILL.md with only whitespace (trim to zero length)
     fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '   \n  \n');
 
     const result = runValidatorWithDir('validate-skills', 'SKILLS_DIR', testDir);
@@ -2483,7 +2473,6 @@ function runTests() {
   })) passed++; else failed++;
 
   // ==========================================
-  // validate-install-manifests.js
   // ==========================================
   console.log('\nvalidate-install-manifests.js:');
 

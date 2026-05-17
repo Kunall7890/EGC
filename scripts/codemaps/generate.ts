@@ -302,7 +302,6 @@ function main(): void {
   // Classify files into areas
   const areas = classifyFiles(allFiles);
 
-  // Generate INDEX.md
   const indexContent = generateIndex(areas, allFiles);
   const indexPath = path.join(OUTPUT_DIR, 'INDEX.md');
   fs.writeFileSync(indexPath, indexContent, 'utf8');

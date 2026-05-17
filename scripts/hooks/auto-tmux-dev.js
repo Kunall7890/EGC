@@ -41,7 +41,6 @@ function run(rawInput) {
     const devServerRegex = /(npm run dev\b|pnpm( run)? dev\b|yarn dev\b|bun run dev\b)/;
 
     if (devServerRegex.test(cmd)) {
-      // Get session name from current directory basename, sanitize for shell safety
       // e.g., /home/user/Portfolio → "Portfolio", /home/user/my-app-v2 → "my-app-v2"
       const rawName = path.basename(process.cwd());
       // Replace non-alphanumeric characters (except - and _) with underscore to prevent shell injection
@@ -77,7 +76,6 @@ function run(rawInput) {
             },
           });
         }
-        // else: tmux not found, pass through original command unchanged
       }
     }
 

@@ -329,7 +329,6 @@ test('observe.sh creates counter file and increments on each call', () => {
   const projectDir = path.join(testDir, 'project');
   fs.mkdirSync(projectDir, { recursive: true });
 
-  // Create a minimal detect-project.sh that sets required vars
   const skillRoot = path.join(testDir, 'skill');
   const scriptsDir = path.join(skillRoot, 'scripts');
   const hooksDir = path.join(skillRoot, 'hooks');
@@ -363,7 +362,6 @@ test('observe.sh creates counter file and increments on each call', () => {
     cwd: projectDir
   });
 
-  // Run observe.sh twice
   for (let i = 0; i < 2; i++) {
     spawnSync('bash', [testObserve, 'post'], {
       input: hookInput,
@@ -385,7 +383,6 @@ test('observe.sh creates counter file and increments on each call', () => {
     const counterVal = parseInt(val, 10);
     assert.ok(counterVal >= 1 && counterVal <= 2, `Counter should be 1 or 2 after 2 calls, got ${counterVal}`);
   } else {
-    // If python3 is not available the hook exits early - that is acceptable
     const hasPython = spawnSync('python3', ['--version']).status === 0;
     if (hasPython) {
       assert.fail('Counter file should exist after running observe.sh');
@@ -422,7 +419,6 @@ test('allowedTools includes Write permission', () => {
 
 test('egc invocation still includes ECC_SKIP_OBSERVE and ECC_HOOK_PROFILE guards', () => {
   const content = fs.readFileSync(observerLoopPath, 'utf8');
-  // Find the egc execution line(s). The model is symbolic / resolver-driven
   // (no pinned versioned model ID), so match on the invocation, not a model name.
   const lines = content.split('\n');
   const egcLine = lines.find(l => l.includes('egc --model'));

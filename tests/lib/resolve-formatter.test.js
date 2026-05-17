@@ -122,7 +122,6 @@ function runTests() {
     fs.writeFileSync(path.join(root, 'package.json'), '{}');
 
     const first = findProjectRoot(root);
-    // Remove package.json — cache should still return the old result
     fs.unlinkSync(path.join(root, 'package.json'));
     const second = findProjectRoot(root);
 

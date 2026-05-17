@@ -90,7 +90,6 @@ function detectFormatter(projectRoot) {
     }
   }
 
-  // Check package.json "prettier" key before config files
   try {
     const pkgPath = path.join(projectRoot, 'package.json');
     if (fs.existsSync(pkgPath)) {

@@ -112,7 +112,6 @@ function detectFromPackageJson(projectDir = process.cwd()) {
     try {
       const pkg = JSON.parse(content);
       if (pkg.packageManager) {
-        // Format: "pnpm@8.6.0" or just "pnpm"
         const pmName = pkg.packageManager.split('@')[0];
         if (PACKAGE_MANAGERS[pmName]) {
           return pmName;

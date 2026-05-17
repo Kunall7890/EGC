@@ -684,7 +684,6 @@ async function runTests() {
     passed++;
   else failed++;
 
-  // check-console-log.js tests
   console.log('\ncheck-console-log.js:');
 
   if (
@@ -965,7 +964,6 @@ async function runTests() {
       const sessionsDir = getCanonicalSessionsDir(isoHome);
       fs.mkdirSync(sessionsDir, { recursive: true });
 
-      // Create an active .tmp session file
       const sessionFile = path.join(sessionsDir, '2026-02-11-test-session.tmp');
       fs.writeFileSync(sessionFile, '# Session: 2026-02-11\n**Started:** 10:00\n');
 
@@ -1091,7 +1089,6 @@ async function runTests() {
       const sessionId = 'test-interval-' + Date.now();
       const counterFile = path.join(os.tmpdir(), `egc-tool-count-${sessionId}`);
 
-      // Set counter to 74 (next will be 75, which is >50 and 75%25==0)
       fs.writeFileSync(counterFile, '74');
 
       const result = await runScript(path.join(scriptsDir, 'suggest-compact.js'), '', {
@@ -1330,7 +1327,6 @@ async function runTests() {
     await asyncTest('limits console.log output to 5 matches', async () => {
       const testDir = createTestDir();
       const testFile = path.join(testDir, 'many-logs.js');
-      // Create a file with 8 console.log statements
       const lines = [];
       for (let i = 1; i <= 8; i++) {
         lines.push(`console.log('debug ${i}');`);
@@ -1650,7 +1646,6 @@ async function runTests() {
 
   if (
     await asyncTest('stops tsconfig walk at max depth (20)', async () => {
-      // Create a deeply nested directory (>20 levels) with no tsconfig anywhere
       const testDir = createTestDir();
       let deepDir = testDir;
       for (let i = 0; i < 25; i++) {
@@ -2523,7 +2518,6 @@ async function runTests() {
       const sessionId = `test-overflow-${Date.now()}`;
       const counterFile = path.join(os.tmpdir(), `egc-tool-count-${sessionId}`);
       try {
-        // Write a value that passes Number.isFinite() but exceeds 1000000 clamp
         fs.writeFileSync(counterFile, '999999999999');
         const result = await runScript(path.join(scriptsDir, 'suggest-compact.js'), '', {
           EGC_SESSION_ID: sessionId
@@ -2623,7 +2617,6 @@ async function runTests() {
   if (
     await asyncTest('stdout is exact byte match of stdin (no trailing newline)', async () => {
       // Before the fix, console.log(data) added a trailing \n.
-      // process.stdout.write(data) should preserve exact bytes.
       const stdinData = '{"tool":"test","value":42}';
       const result = await runScript(path.join(scriptsDir, 'check-console-log.js'), stdinData);
       assert.strictEqual(result.code, 0);
@@ -3302,7 +3295,6 @@ async function runTests() {
       const sessionsDir = getCanonicalSessionsDir(isoHome);
       fs.mkdirSync(sessionsDir, { recursive: true });
 
-      // Create a session .tmp file and a non-session .tmp file
       const sessionFile = path.join(sessionsDir, '2026-02-11-abc-session.tmp');
       const otherTmpFile = path.join(sessionsDir, 'other-data.tmp');
       fs.writeFileSync(sessionFile, '# Session\n');
@@ -3486,7 +3478,6 @@ async function runTests() {
       const sessionId = `test-corrupt-${Date.now()}`;
       const counterFile = path.join(os.tmpdir(), `egc-tool-count-${sessionId}`);
       try {
-        // Write non-numeric data to trigger parseInt → NaN → reset to 1
         fs.writeFileSync(counterFile, 'corrupted data here!!!');
         const result = await runScript(path.join(scriptsDir, 'suggest-compact.js'), '', {
           EGC_SESSION_ID: sessionId
@@ -3754,7 +3745,6 @@ async function runTests() {
     await asyncTest('uses process.stdout.write instead of console.log for pass-through', async () => {
       const formatSource = fs.readFileSync(path.join(scriptsDir, 'post-edit-format.js'), 'utf8');
       assert.ok(formatSource.includes('process.stdout.write(data)'), 'Should use process.stdout.write to avoid trailing newline');
-      // Verify no console.log(data) for pass-through (console.error for warnings is OK)
       const lines = formatSource.split('\n');
       const passThrough = lines.filter(l => /console\.log\(data\)/.test(l));
       assert.strictEqual(passThrough.length, 0, 'Should not use console.log(data) for pass-through');
@@ -4137,7 +4127,6 @@ async function runTests() {
       assert.strictEqual(result.code, 0);
       // ~ should expand to os.homedir() which during the script run is the real home
       // The script creates the directory via ensureDir — check that it attempted to
-      // create a directory starting with the home dir, not a literal ~/
       assert.ok(!fs.existsSync(path.join(testDir, '~', 'test-tilde-skills')), 'Should NOT create literal ~/test-tilde-skills directory');
       cleanupTestDir(testDir);
     })
@@ -4528,13 +4517,11 @@ async function runTests() {
       fs.mkdirSync(sessionsDir, { recursive: true });
       fs.mkdirSync(path.join(isoHome, '.gemini', 'skills', 'learned'), { recursive: true });
 
-      // Create session file 6.9 days old (should be INCLUDED by maxAge:7)
       const recentFile = path.join(sessionsDir, '2026-02-06-recent69-session.tmp');
       fs.writeFileSync(recentFile, '# Recent Session\n\nRECENT CONTENT HERE');
       const sixPointNineDaysAgo = new Date(Date.now() - 6.9 * 24 * 60 * 60 * 1000);
       fs.utimesSync(recentFile, sixPointNineDaysAgo, sixPointNineDaysAgo);
 
-      // Create session file 8 days old (should be EXCLUDED by maxAge:7)
       const oldFile = path.join(sessionsDir, '2026-02-05-old8day-session.tmp');
       fs.writeFileSync(oldFile, '# Old Session\n\nOLD CONTENT SHOULD NOT APPEAR');
       const eightDaysAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000);
@@ -4637,7 +4624,6 @@ async function runTests() {
     await asyncTest('handles stdin exceeding MAX_STDIN (1MB) gracefully', async () => {
       const testDir = createTestDir();
       const transcriptPath = path.join(testDir, 'transcript.jsonl');
-      // Create a minimal valid transcript so env var fallback works
       fs.writeFileSync(transcriptPath, JSON.stringify({ type: 'user', content: 'Overflow test' }) + '\n');
 
       // Create stdin > 1MB: truncated JSON will be invalid → falls back to env var
@@ -4732,7 +4718,6 @@ async function runTests() {
       const sessionsDir = getCanonicalSessionsDir(isoHome);
       fs.mkdirSync(sessionsDir, { recursive: true });
 
-      // Create a session file with real content, then make it unreadable
       const sessionFile = path.join(sessionsDir, `${Date.now()}-session.tmp`);
       fs.writeFileSync(sessionFile, '# Sensitive session content that should NOT appear');
       fs.chmodSync(sessionFile, 0o000);
@@ -4834,7 +4819,6 @@ async function runTests() {
       const sessionsDir = getCanonicalSessionsDir(isoHome);
       fs.mkdirSync(sessionsDir, { recursive: true });
 
-      // Create transcript with a user message so a summary is produced
       const testDir = createTestDir();
       const transcriptPath = path.join(testDir, 'transcript.jsonl');
       fs.writeFileSync(transcriptPath, '{"type":"user","content":"test message"}\n');
@@ -5342,7 +5326,6 @@ async function runTests() {
       const today = new Date().toISOString().split('T')[0];
       const sessionFile = path.join(sessionsDir, `session-${today}.tmp`);
 
-      // Write a corrupted template: has the marker but NOT the full regex structure
       const corruptedTemplate = `# Session: ${today}
 **Date:** ${today}
 **Started:** 10:00
@@ -5495,7 +5478,6 @@ Some random content without the expected ### Context to Load section
       });
       assert.strictEqual(result.code, 0, 'Should exit 0');
 
-      // Read the session file to verify tool names and file paths were extracted
       const claudeDir = getCanonicalSessionsDir(testDir);
       if (fs.existsSync(claudeDir)) {
         const files = fs.readdirSync(claudeDir).filter(f => f.endsWith('.tmp'));

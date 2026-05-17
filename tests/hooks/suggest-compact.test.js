@@ -162,7 +162,6 @@ function runTests() {
   if (test('uses default threshold (50) when COMPACT_THRESHOLD is not set', () => {
     const { sessionId, counterFile, cleanup } = createCounterContext();
     cleanup();
-    // Write counter to 49, next run will be 50 = default threshold
     fs.writeFileSync(counterFile, '49');
     const result = runCompact({ EGC_SESSION_ID: sessionId });
     assert.ok(

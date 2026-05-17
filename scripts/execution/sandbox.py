@@ -35,7 +35,6 @@ class SandboxController:
         if rel_path == ".":
             return ValidationResult(True)
         
-        # Check if the rel_path starts with one of the allowed directories
         for d in self.policy.allowed_dirs:
             # Need to remove trailing slash from allowed_dirs for check
             if rel_path.startswith(d.rstrip('/')):
