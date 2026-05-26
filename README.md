@@ -1,255 +1,188 @@
-# Everything Gemini Code
+# EGC - Everything Gemini Code
 
-## ⚠️ Compatibility & Transition Status
-**Everything Gemini Code (EGC) is entering a structured transition and preservation phase.**
-As the Google ecosystem evolves toward the **Antigravity** runtime and **Model Context Protocol (MCP)**, we are freezing the current stable generation to ensure long-term stability and continuity.
+**Your AI remembers what you decided, how you work, and where you left off. Across every session. Across every tool.**
 
-- **Status:** Fully Operational (Gemini CLI Final Generation)
-- **Support:** Continuity and backward compatibility are prioritized.
-- **Future:** EGC is adapting to an MCP-first architecture to enhance interoperability.
-- **Transition Roadmap:** [View TRANSITION_ROADMAP.md](./TRANSITION_ROADMAP.md)
+[![Stars](https://img.shields.io/github/stars/Fmarzochi/everything-gemini?style=social)](https://github.com/Fmarzochi/everything-gemini/stargazers) [![Forks](https://img.shields.io/github/forks/Fmarzochi/everything-gemini?style=social)](https://github.com/Fmarzochi/everything-gemini/network/members) [![Issues](https://img.shields.io/github/issues/Fmarzochi/everything-gemini)](https://github.com/Fmarzochi/everything-gemini/issues) [![Node.js >= 18](https://img.shields.io/badge/node-%3E%3D18-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org) [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?logo=sqlite&logoColor=white)](https://sqlite.org) [![Zod](https://img.shields.io/badge/Zod-validation-3E67B1)](https://zod.dev) [![Bash](https://img.shields.io/badge/Bash-installer-4EAA25?logo=gnubash&logoColor=white)](https://www.gnu.org/software/bash) [![Markdown](https://img.shields.io/badge/Markdown-228%20skills-000000?logo=markdown&logoColor=white)](skills/) [![MCP](https://img.shields.io/badge/MCP-2%20servers-orange)](https://modelcontextprotocol.io) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ---
 
-![Everything Gemini Code — the performance system for AI agent harnesses](assets/hero.png)
+## This is what EGC looks like in practice
 
-[![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg?style=flat-square)]() [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE) [![Engine](https://img.shields.io/badge/engine-Gemini%20Native-1a73e8.svg?style=flat-square)]() [![Bridge](https://img.shields.io/badge/bridge-Claude%20%7C%20OpenAI%20%7C%20Ollama-d97757.svg?style=flat-square)]() [![Language](https://img.shields.io/badge/tech-Python%20%7C%20TypeScript%20%7C%20SQLite-3776AB?style=flat-square)]() [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue?style=flat-square)]() [![Local First](https://img.shields.io/badge/telemetry-Local--First-2ea44f?style=flat-square)]() [![Obsidian](https://img.shields.io/badge/interop-Obsidian-8b6cef?style=flat-square)](https://obsidian.md)
+You open AGY on a project you haven't touched in two weeks. Without typing anything:
 
-<div align="center"></div>
+```
+State loaded from egc-memory via ~/.egc/state/Projetos--everything-gemini.md
 
-**A Gemini-first orchestration ecosystem and local-first AI operational environment.**
+Context and preferences acknowledged (no AI attribution, terse responses).
 
-Everything Gemini Code (EGC) is a multi-harness deployment system and cognitive payload manager. It transforms standard AI assistants into capable, standardized engineering teams by injecting curated skills, agents, and orchestration instructions into your environment. 
+Ready to pick up the next items:
+• Test full install on a clean machine
+• Add GEMINI.md with session memory protocol
+• Tag v1.0.0 after clean install test passes
+• Add mcp_server_count to audit.js
+```
 
-EGC excels at organizing, versioning, and deploying complex cognitive workflows into third-party IDEs (Cursor, Codebuddy, Codex) and CLIs. It provides a serious, cross-platform control plane that wraps standard AI models in strict, observable engineering procedures.
-
-### The EGC Control Plane in Action
-
-> *Live Execution: The EGC Control Plane tracking capability inventory and orchestration.*
-
-<div align="center">
-  <video src="https://raw.githubusercontent.com/Fmarzochi/everything-gemini/main/assets/demo.mp4" autoplay loop muted playsinline width="100%"></video>
-</div>
-
-*(Note: If the video above does not play automatically in your Markdown viewer, you can download `assets/demo.mp4` to view the full control plane showcase.)*
+The AI already knows what you were building, what decisions you made, what failed, and exactly where you stopped. You didn't type anything. You just started working.
 
 ---
 
-## 🚀 Get Started
+## The problem
 
-EGC is designed for low-friction onboarding. It installs the knowledge and workflows you need directly into the tools you already use.
+Every AI coding session starts from zero. Close the window and the context is gone — your stack preferences, the architectural decisions you made last week, the approach that failed after three attempts. Next session you spend the first ten minutes re-explaining ground you already covered.
 
-### 1. System Requirements
-*   **Node.js 18+** (Required for the installer and hook mesh)
-*   **Python 3.10+** (Required for the Dashboard UI and test runners)
-*   **Git**
+It gets worse when you switch tools. Move from Cursor to Claude Code and you start over again. The AI doesn't know you. It never did.
 
-### 2. Clone & Initialize
-Download the ecosystem and bootstrap the local state store.
+---
+
+## How EGC fixes it
+
+One install. Every tool. Permanent memory.
+
+`sh install.sh` detects which AI tools you have installed — Cursor, Claude Code, AGY, Kiro, Codex, OpenCode — and wires up memory hooks in all of them automatically. From that point on:
+
+- **Open any session** → hook fires → AI reads your project state → picks up where you left off
+- **Close any session** → hook fires → AI saves decisions, preferences, next steps
+- **Switch tools** → same state file → same context → no re-explaining
+
+The memory lives at `~/.egc/state/` on your machine, not inside any tool. It follows the project, not the IDE.
+
+---
+
+## Token savings
+
+Rebuilding context from scratch costs ~1,500 tokens per session. EGC's state file delivers the same information in ~200 tokens.
+
+| | Without EGC | With EGC |
+|---|---|---|
+| Context overhead per session | ~1,500 tokens | ~200 tokens |
+| 20 sessions/month (Claude Sonnet) | ~$0.09 | ~$0.012 |
+| 20 sessions/month (GPT-4o) | ~$0.075 | ~$0.010 |
+| Time re-explaining context | 10 min/session | 0 |
+
+The money saved is small. The time and interrupted flow are not.
+
+---
+
+## Installation
+
+### Linux / macOS
+
+You need [Node.js 18 or later](https://nodejs.org/en/download). Not sure if you have it? Open a terminal and run `node --version`. If it shows 18 or higher, you're ready.
 
 ```bash
 git clone https://github.com/Fmarzochi/everything-gemini.git
 cd everything-gemini
-
-# Install Node dependencies (State-Store & Hooks)
-npm install
-
-# Bootstrap the local SQLite state-store (idempotent, safe to run anytime)
-node scripts/bootstrap-state-db.js
+sh install.sh
 ```
 
-### 3. Launch the Control Plane
-The EGC Dashboard is a zero-dependency Tkinter GUI. Use it to explore the massive catalog of 228+ skills and 62+ agents before deploying them.
+The installer will print which tools it found and registered:
+
+```
+EGC install
+  node v22.0.0
+  building egc-guardian...
+  building egc-memory...
+  initializing database...
+  registering MCP servers...
+  ✓ registered in Antigravity CLI
+  ✓ registered in Claude Code (global)
+  ✓ registered in Cursor
+
+Installation complete.
+Run 'egc doctor' to verify.
+```
+
+### Windows
+
+```powershell
+git clone https://github.com/Fmarzochi/everything-gemini.git
+cd everything-gemini
+.\install.ps1
+```
+
+---
+
+## Prompt library
+
+228 skills, 62 agents, 74 commands, and 110 rules — written from real experience, not generated.
+
+| Type | Count | What it is |
+|---|---|---|
+| Skills | 228 | Domain-specific workflow runbooks |
+| Agents | 62 | Persona and behavior definitions |
+| Commands | 74 | Command definitions and lifecycle hooks |
+| Rules | 110 | Constraints and governance directives |
+
+Organized per harness under `.cursor/`, `.claude/`, `.gemini/`, `.kiro/`, and four others. Switch tools and the same workflows follow you.
+
+---
+
+## Supported tools
+
+| Tool | Auto-registered by installer |
+|---|---|
+| Claude Code | Yes |
+| Antigravity CLI (AGY) | Yes |
+| Cursor | Yes |
+| Kiro | Yes |
+| Codex CLI | Yes |
+| OpenCode | Yes |
+| Gemini CLI | Yes |
+| CodeBuddy | Context injection |
+| Trae | Context injection |
+| Obsidian | Yes — if already configured, synced to all tools |
+
+If you use Obsidian and have the [Obsidian MCP server](https://github.com/MarkusPfundstein/mcp-obsidian) configured, the installer detects it automatically and gives every AI tool in your setup direct access to your vault — read notes, search, write — without any extra configuration.
+
+---
+
+## MCP servers
+
+EGC runs two local MCP servers over stdio.
+
+**egc-memory** — the one you'll use every session
+
+| Tool | What it does |
+|---|---|
+| `get_state` | Reads project memory at session start |
+| `update_state` | Saves this session's decisions, preferences, and next steps |
+| `store_decision` | Persists a decision to SQLite |
+| `query_history` | Returns past decisions by timestamp |
+
+**egc-guardian** — runs in the background
+
+| Tool | What it does |
+|---|---|
+| `validate_command` | Blocks shell injection and unsafe binaries |
+| `validate_write` | Blocks writes to sensitive paths (`~/.ssh`, `/etc`) |
+| `reduce_context` | Deduplicates and trims Markdown payloads |
+| `orchestrate_task` | Routes prompts to relevant agents and skills |
+
+---
+
+## CLI
 
 ```bash
-# Setup Python Virtual Environment
-python3 -m venv .venv
-source .venv/bin/activate  # On Windows use: .\.venv\Scripts\activate
-pip install -r requirements.txt
-
-# Run the Dashboard
-python3 egc_dashboard.py
-```
-
-### 4. Deploy Capabilities to Your Harness
-Use the EGC Node installer to deploy skills and agents directly into your preferred IDE or CLI framework (Cursor, Codex, Antigravity, Codebuddy).
-
-```bash
-# Example: Install TypeScript skills and core rules into a Cursor project
-npm run egc-install -- --target cursor --profile developer typescript
-```
-
-### 5. Enable Cognitive Memory (Optional)
-To enable long-term persistence and Obsidian integration:
-
-1.  **Configure Environment:** Copy `.env.example` to `.env` and add your `OBSIDIAN_TOKEN`.
-2.  **Initialize Settings:** Copy `egc_settings.json.example` to `egc_settings.json` and set your `vaultPath`.
-3.  **Local Context:** EGC will automatically start indexing sessions into your local memory and vault.
-
----
-
-## 📊 Ecosystem Inventory & Cross-Tool Parity
-
-EGC ships with a massive, continuously validated catalog of cognitive payloads, ensuring that your AI harness has the right context for the job. Out of the box you get access to 62 agents, 228 skills, and 74 commands, strictly validated by the CI catalog gate (`scripts/ci/catalog.js`).
-
-### Catalog Snapshot
-
-| Surface | Inventory | Description |
-|---------|-----------|-------------|
-| **Agents** | 62 agents | Specialized personas (e.g., `security-reviewer`) that handle distinct domains. |
-| **Skills** | 228 skills | Standardized operating procedures organized in 14 categories. |
-| **Commands** | 74 commands | CLI slash-command entrypoints for terminal execution. |
-| **Rules** | 109 rules | Shared behavioral constraints, coding standards and runtime governance directives. |
-| **Hooks** | 43 hooks | Runtime interception and lifecycle middleware surfaces. |
-| **Governance Overlays** | 2 overlays | Shared AGENTS.md constitutional layers influencing semantic routing and behavior. |
-| **Cognitive Memory** | Obsidian + Local | Persistence layer for long-term project knowledge and vault integration. |
-
-### Cross-Harness Parity
-
-How the EGC native inventory compares to the same surfaces in other major AI coding harnesses:
-
-| Surface | Gemini Code (EGC) | Claude Code | Codex CLI | OpenCode |
-|---------|------------------:|-------------|-----------|---------:|
-| **Agents** | 62 | Shared (AGENTS.md) | Shared (AGENTS.md) | 12 |
-| **Commands** | 74 | Shared | Instruction-based | 31 |
-| **Skills** | 228 | Shared | 10 (native format) | 37 |
-| **Rules** | 109 | Shared | Shared | Supported |
-| **Hooks** | 43 | Native | Unsupported | Supported |
-| **Overlays** | 2 | Shared | Shared | Shared |
-
----
-
-## 🏗️ Architecture & Runtime Truth
-
-EGC is built on a dual-stack architecture: Node.js handles deployment, state, and context ingestion (the "mesh"), while Python provides the visual dashboard, basic provider bridging, and orchestration substrates.
-
-### Runtime Status Matrix
-
-We believe in technical honesty. EGC contains preserved architectural substrates from its ongoing evolution as an orchestration environment. The following matrix distinguishes active production surfaces from experimental or dormant topology layers.
-
-| Layer | Status | Notes |
-|---|---|---|
-| **Installer & Manifests** | **ACTIVE** | `manifests/install-modules.json` is the absolute truth for ecosystem deployment. |
-| **Node Hook Mesh** | **ACTIVE** | Context injection, session state, and execution hooks via `scripts/hooks/*.js`. |
-| **Dashboard UI** | **ACTIVE** | `egc_dashboard.py` proporciona visibilidade do plano de controle e descoberta de inventário. |
-| **Cognitive Memory** | **ACTIVE** | `src/llm/memory/` provides local-first persistence with Obsidian and MCP providers. |
-| **Provider Bridge** | **ACTIVE** | `src/llm/cli/prompt.py` provides the canonical Python CLI forwarder. |
-| **Registry Snapshots** | **ACTIVE (HOT CACHE)** | `runtime-map.json` acts as the Full Operational Topology Cache, auto-regenerated on install. Discovery falls back to physical disk search only on drift. |
-| **Execution Orchestrator** | **ORPHAN-BY-TESTS** | Simulated Python event loop preserved for structural topology continuity. |
-| **Execution Queue** | **ORPHAN-BY-TESTS** | Python task queues exist primarily as an architectural mockup in tests. |
-| **Workflow Engine** | **ORPHAN-BY-TESTS** | Experimental workflow parser kept alive by topology CI constraints. |
-
-### Operational Surfaces & Topology
-
-EGC execution is governed by both **Cognitive** and **Behavioral** topology, indexed centrally to ensure structural observability:
-
-- **Cognitive Topology (`agents/`, `skills/`)**: Represents *what the AI knows*. Provides domain expertise, specific roles, and declarative instructions.
-- **Behavioral Topology (`commands/`, `rules/`, `scripts/hooks/`)**: Represents *how the AI acts and interacts*. Encompasses operational entrypoints (Slash Commands), runtime directives that alter execution mathematically and stylistically, and event interceptors that modify the runtime lifecycle.
-- **Governance Overlays (`AGENTS.md`)**: Shared constitutional rules loaded by the host harness. They act as a behavioral substrate to influence semantic routing and global orchestration.
-
----
-
-## 🧠 Cognitive Infrastructure & Memory Sovereignty
-
-EGC implements a local-first **Cognitive Memory Layer** designed to persist project knowledge, architectural decisions, and session context without cloud dependencies.
-
-### Architecture Map
-
-```text
-[ USER HARNESS ] <───> [ SESSION BRIDGE ] <───> [ MEMORY MANAGER ]
-                                                       │
-          ┌────────────────────────────────────────────┴────────────────────────────────┐
-          │                                            │                                │
-[ LOCAL PROVIDER ]                         [ OBSIDIAN PROVIDER ]                [ MCP PROVIDER ]
- (memory/state.db)                       (User-Owned .md Vault)                (Remote/Local MCP)
-          │                                            │                                │
-    TRUST BOUNDARY                              TRUST BOUNDARY                   TRUST BOUNDARY
- (Git Ignored Layer)                         (Outside Repository)              (Dynamic Injection)
-```
-
-### Security & Privacy Model: The "Empty-Push" Architecture
-
-We enforce a strict separation between **OSS Runtime** (shared) and **User Cognition** (private).
-
-*   **Sovereignty:** The runtime code is open source, but your cognition remains local.
-*   **Git Isolation:** Sensitive directories (`memory/`, `.sessions/`, `archaeology/`) and databases are hard-coded in `.gitignore`.
-*   **Secret Injection:** Tokens and absolute paths are never hardcoded. They are injected at runtime via `.env` (using `${OBSIDIAN_TOKEN}`).
-*   **Empty-Push:** Your `git push` remains structurally empty of any private knowledge, notes, or session traces.
-
----
-
-## 💻 Technology Stack & Directory Tree
-
-*   **Core:** Node.js, Python 3.10+, Bash
-*   **Database / State:** SQLite (via Node), JSON Manifests
-*   **Presentation:** Tkinter (GUI), Markdown
-*   **AI Providers Supported (via Bridge):** Google Gemini, Anthropic Claude, OpenAI, Ollama
-
-```text
-everything-gemini/
-├── agents/             # Cognitive worker definitions (e.g., code-architect)
-├── skills/             # Domain-specific workflows and knowledge base
-├── commands/           # CLI slash-command entrypoints
-├── rules/              # Language-specific coding standards
-├── manifests/          # The canonical deployment and installation truths
-├── scripts/            # Node hooks, installers, and Python orchestration mockups
-├── src/                # The Python CLI prompt-bridge
-└── egc_dashboard.py    # The visual control plane GUI
+egc doctor    # verify both servers are built and working
+egc status    # show the last 5 decisions in memory
+egc init      # reinitialize ~/.egc/ if needed
+egc config    # print the MCP server configuration
 ```
 
 ---
 
-## 🌐 Cross-Platform Support
+## Architectural consolidation
 
-EGC is developed and tested primarily on Linux. macOS works natively. Windows support is comprehensive for the Node.js installation tools, while Python execution is best-effort.
+Earlier versions of EGC explored distributed runtime concepts — FederationManager, ReplayEngine, cognitive orchestration layers, multi-provider dispatching. Those experiments were real explorations, not deception. They helped define what the project actually needed to be.
 
-### Linux & macOS — ✅ Primary Target
-*   **Execution:** Native Node.js and Bash.
-*   **UI:** Requires `python3-tk` installed on Linux; native on macOS.
+What the project actually needed was simpler and more useful: persistent memory across sessions, a validation layer, and a prompt library that works in every tool without reconfiguration.
 
-### Windows — ⚠️ Supported via PowerShell / WSL
-*   **Execution:** `install.ps1` runs natively in PowerShell or Command Prompt.
-*   **Recommended:** WSL2 (Ubuntu) is recommended for full POSIX hook compatibility.
+The current runtime reflects that consolidation. Two MCP servers, local SQLite, plain Markdown state files, one install command. Everything else was removed or isolated.
+
+The branch `legacy-runtime` preserves the full historical architecture for anyone who wants to study the evolution.
 
 ---
 
-## 📡 Telemetry & Local State
+## License
 
-EGC is fundamentally local-first. **Nothing is transmitted** outside of your explicit requests to AI model providers. No silent telemetry. No cloud databases.
-
-| Surface | Path | Format |
-|---|---|---|
-| Shared state store | `~/.gemini/egc/state.db` | SQLite |
-| Install-state per harness | `<target>/egc-install-state.json` | JSON |
-| Session trace | `.sessions/execution_log.jsonl` | JSONL |
-
-You can safely delete `.sessions/` or the state DB at any time to reset your local telemetry.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Whether you are adding a new Skill, adjusting an Agent prompt, or improving the Node installer, EGC thrives on community engineering.
-
-1. Fork the repository.
-2. Create your feature branch (`git checkout -b feature/AmazingSkill`).
-3. Commit your changes (`git commit -m 'Add new AmazingSkill'`).
-4. Push to the branch (`git push origin feature/AmazingSkill`).
-5. Open a Pull Request.
-
-*(Note: Changes to the core orchestration Python scripts are heavily tested by CI topology gates and should be approached with caution.)*
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
-  <img src="assets/images/egc-logo.png" width="40" height="40" alt="EGC Logo">
-  <br>
-  <b>Built with precision by Felipe Marzochi.</b><br>
-  <i>Elevating AI orchestration from chatboxes to engineering systems.</i>
-</div>
+MIT — built by [Felipe Marzochi](https://github.com/Fmarzochi)

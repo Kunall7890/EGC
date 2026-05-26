@@ -1,0 +1,13 @@
+{
+  "name": "session-save",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "Persist project memory at the end of each session via egc-memory update_state",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Review this session and call the egc-memory tool `update_state` (omit project_path — it defaults to the current working directory) with a summary of what happened. Include: `context` (one sentence on current project phase), `decisions` (what was decided and why), `avoid` (what failed or was rejected and why to skip it next time), `preferences` (any coding or workflow preferences identified), and `next` (first things to pick up in the next session). Only include fields that have new information from this session. If the session produced nothing relevant — no decisions, no failures, no meaningful progress — skip the call entirely."
+  }
+}

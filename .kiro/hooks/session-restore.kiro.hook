@@ -1,0 +1,13 @@
+{
+  "name": "session-restore",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "Restore project memory at the start of each session via egc-memory get_state",
+  "when": {
+    "type": "agentStart"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Call the egc-memory tool `get_state` now (omit project_path — it defaults to the current working directory). Read the returned Markdown in full. It contains previous decisions, what failed, coding preferences, and what to pick up next. Resume work from where the last session left off. Do not ask the user to re-explain anything already recorded in the state."
+  }
+}

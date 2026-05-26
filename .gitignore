@@ -201,4 +201,33 @@ memory/**
 **/*.sqlite
 **/*.db
 **/*.db-wal
+**/*.db-shm
 **/.DS_Store
+
+# =========================================================
+# GENERATED LOCAL CONFIGS — contain absolute paths
+# =========================================================
+.mcp.egc.json
+.mcp.json
+
+# =========================================================
+# SYNTHETIC ARTIFACTS — not real data
+# =========================================================
+benchmark_results.json
+mcp/cognitive_*.mjs
+mcp/cognitive_*.json
+mcp/dump_task.mjs
+mcp/governance_baseline.json
+mcp/heuristic_registry.json
+mcp/provider_usage.json
+
+# =========================================================
+# PERSONAL EXPLORATION — never publish
+# =========================================================
+archaeology/
+journals/
+
+# =========================================================
+# LEGACY RUNTIME — uncompiled, not imported
+# =========================================================
+mcp/servers/egc-guardian/src/cognitive-orchestrator/

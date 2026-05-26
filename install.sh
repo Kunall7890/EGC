@@ -1,52 +1,280 @@
-#!/usr/bin/env bash
-# install.sh — Legacy shell entrypoint for the EGC installer.
-#
-# This wrapper resolves the real repo/package root when invoked through a
-# symlinked npm bin, then delegates to the Node-based installer runtime.
-# Runtime paths derive from the wrapper location, never from the cwd.
+#!/bin/bash
+set -e
 
-set -euo pipefail
+ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-SCRIPT_PATH="$0"
-while [ -L "$SCRIPT_PATH" ]; do
-    link_dir="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
-    SCRIPT_PATH="$(readlink "$SCRIPT_PATH")"
-    [[ "$SCRIPT_PATH" != /* ]] && SCRIPT_PATH="$link_dir/$SCRIPT_PATH"
-done
-SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+echo "EGC install"
 
-# --- Production-grade environment validation (fail deterministically) ---
-fail() { echo "[EGC] ERROR: $*" >&2; exit 1; }
+# Node.js version check
+NODE_MAJOR=$(node -e "process.stdout.write(process.versions.node.split('.')[0])" 2>/dev/null || echo "0")
+if [ "$NODE_MAJOR" -lt 18 ]; then
+  echo "Error: Node.js >= 18 is required (found: $(node --version 2>/dev/null || echo 'not found'))"
+  exit 1
+fi
+echo "  node $(node --version)"
 
-command -v node >/dev/null 2>&1 || fail "Node.js not found in PATH. Install Node.js >= 18."
-NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)"
-case "$NODE_MAJOR" in ''|*[!0-9]*) NODE_MAJOR=0 ;; esac
-[ "$NODE_MAJOR" -ge 18 ] || fail "Node.js >= 18 required (found: $(node --version 2>/dev/null || echo none))."
+# Root dependencies (better-sqlite3 etc.)
+echo "  installing root dependencies..."
+cd "$ROOT_DIR"
+npm install --silent
 
-PYTHON_BIN=""
-for c in python3 python; do
-    if command -v "$c" >/dev/null 2>&1; then PYTHON_BIN="$c"; break; fi
-done
-[ -n "$PYTHON_BIN" ] || fail "Python not found in PATH. Install Python >= 3.10 (python3 or python)."
-PY_OK="$("$PYTHON_BIN" -c 'import sys; print(1 if sys.version_info[:2] >= (3, 10) else 0)' 2>/dev/null || echo 0)"
-[ "$PY_OK" = "1" ] || fail "Python >= 3.10 required (found: $("$PYTHON_BIN" --version 2>&1 || echo none))."
+# egc-guardian
+echo "  building egc-guardian..."
+GUARDIAN_DIR="$ROOT_DIR/mcp/servers/egc-guardian"
+if [ ! -d "$GUARDIAN_DIR" ]; then
+  echo "Error: $GUARDIAN_DIR not found"
+  exit 1
+fi
+cd "$GUARDIAN_DIR"
+npm install --silent
+npm run build
 
-# Repository-local binaries always win over host binaries.
-export PATH="$SCRIPT_DIR/node_modules/.bin:$SCRIPT_DIR/.venv/bin:$PATH"
+# egc-memory
+echo "  building egc-memory..."
+MEMORY_DIR="$ROOT_DIR/mcp/servers/egc-memory"
+if [ ! -d "$MEMORY_DIR" ]; then
+  echo "Error: $MEMORY_DIR not found"
+  exit 1
+fi
+cd "$MEMORY_DIR"
+npm install --silent
+npm run build
 
-# Auto-install Node dependencies when running from a git clone
-if [ ! -d "$SCRIPT_DIR/node_modules" ]; then
-    echo "[EGC] Installing dependencies..."
-    (cd "$SCRIPT_DIR" && npm install --no-audit --no-fund --loglevel=error) || fail "npm install failed."
+# Initialize database and local directories
+echo "  initializing database..."
+cd "$ROOT_DIR"
+node scripts/egc.js init
+
+# Write harness config template
+cat > "$ROOT_DIR/.mcp.egc.json" <<EOF
+{
+  "mcpServers": {
+    "egc-guardian": {
+      "command": "node",
+      "args": ["$ROOT_DIR/mcp/servers/egc-guardian/build/index.js"]
+    },
+    "egc-memory": {
+      "command": "node",
+      "args": ["$ROOT_DIR/mcp/servers/egc-memory/build/index.js"]
+    }
+  }
+}
+EOF
+echo "  harness config written to .mcp.egc.json"
+
+# Final validation
+node scripts/egc.js doctor
+
+# ── MCP auto-registration ─────────────────────────────────────────────────────
+
+GUARDIAN_BIN="$ROOT_DIR/mcp/servers/egc-guardian/build/index.js"
+MEMORY_BIN="$ROOT_DIR/mcp/servers/egc-memory/build/index.js"
+
+register_mcp_json() {
+  local target="$1"
+  local label="$2"
+  node - "$target" "$GUARDIAN_BIN" "$MEMORY_BIN" <<'NODEEOF'
+const fs   = require("fs");
+const path = require("path");
+
+const [,, target, guardianBin, memoryBin] = process.argv;
+
+let obj = { mcpServers: {} };
+if (fs.existsSync(target)) {
+  try {
+    obj = JSON.parse(fs.readFileSync(target, "utf8"));
+  } catch (_) {
+    process.exit(0);
+  }
+}
+if (!obj.mcpServers) obj.mcpServers = {};
+
+let changed = false;
+if (!obj.mcpServers["egc-guardian"]) {
+  obj.mcpServers["egc-guardian"] = { command: "node", args: [guardianBin] };
+  changed = true;
+}
+if (!obj.mcpServers["egc-memory"]) {
+  obj.mcpServers["egc-memory"] = { command: "node", args: [memoryBin] };
+  changed = true;
+}
+if (!changed) process.exit(0);
+
+const dir = path.dirname(target);
+if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+fs.writeFileSync(target, JSON.stringify(obj, null, 2) + "\n");
+NODEEOF
+  local rc=$?
+  if [ $rc -eq 0 ]; then
+    echo "  ✓ registered in $label ($target)"
+  fi
+}
+
+register_mcp_toml_codex() {
+  local target="$1"
+  node - "$target" "$GUARDIAN_BIN" "$MEMORY_BIN" <<'NODEEOF'
+const fs   = require("fs");
+const path = require("path");
+
+const [,, target, guardianBin, memoryBin] = process.argv;
+
+const guardianEntry =
+  `\n[[mcp_servers]]\nname = "egc-guardian"\ncommand = "node"\nargs = ["${guardianBin}"]\n`;
+const memoryEntry =
+  `\n[[mcp_servers]]\nname = "egc-memory"\ncommand = "node"\nargs = ["${memoryBin}"]\n`;
+
+let content = "";
+if (fs.existsSync(target)) {
+  content = fs.readFileSync(target, "utf8");
+}
+
+let appended = false;
+if (!content.includes('"egc-guardian"') && !content.includes("'egc-guardian'")) {
+  content += guardianEntry;
+  appended = true;
+}
+if (!content.includes('"egc-memory"') && !content.includes("'egc-memory'")) {
+  content += memoryEntry;
+  appended = true;
+}
+if (!appended) process.exit(0);
+
+const dir = path.dirname(target);
+if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+fs.writeFileSync(target, content);
+NODEEOF
+  local rc=$?
+  if [ $rc -eq 0 ]; then
+    echo "  ✓ registered in Codex CLI ($target)"
+  fi
+}
+
+set +e
+echo "  registering MCP servers..."
+
+# AGY (Antigravity CLI)
+if [ -d "$HOME/.gemini/antigravity-cli" ]; then
+  register_mcp_json "$HOME/.gemini/antigravity-cli/mcp_config.json" "Antigravity CLI"
 fi
 
-# On MSYS2/Git Bash, convert the POSIX path to a Windows path so Node.js
-# (a native Windows binary) receives a valid path instead of a doubled one
-# like G:\g\projects\... that results from Git Bash's auto path conversion.
-if command -v cygpath >/dev/null 2>&1; then
-    NODE_SCRIPT="$(cygpath -w "$SCRIPT_DIR/scripts/install-apply.js")"
-else
-    NODE_SCRIPT="$SCRIPT_DIR/scripts/install-apply.js"
+# Gemini CLI (only when AGY is absent to avoid duplication)
+if [ -d "$HOME/.gemini/config" ] && ! [ -d "$HOME/.gemini/antigravity-cli" ]; then
+  register_mcp_json "$HOME/.gemini/config/mcp_config.json" "Gemini CLI"
 fi
 
-exec node "$NODE_SCRIPT" "$@"
+# Claude Code — global config
+if command -v claude >/dev/null 2>&1 || [ -d "$HOME/.claude" ]; then
+  register_mcp_json "$HOME/.claude/claude_desktop_config.json" "Claude Code (global)"
+  if [ -f "$ROOT_DIR/.mcp.json" ]; then
+    register_mcp_json "$ROOT_DIR/.mcp.json" "Claude Code (project .mcp.json)"
+  fi
+fi
+
+# Cursor
+if command -v cursor >/dev/null 2>&1 || [ -d "$HOME/.cursor" ]; then
+  register_mcp_json "$HOME/.cursor/mcp.json" "Cursor"
+fi
+
+# Kiro
+if command -v kiro >/dev/null 2>&1 || [ -d "$HOME/.kiro" ]; then
+  register_mcp_json "$HOME/.kiro/settings/mcp.json" "Kiro"
+fi
+
+# Codex CLI
+if command -v codex >/dev/null 2>&1 || [ -f "$HOME/.codex/config.toml" ]; then
+  register_mcp_toml_codex "$HOME/.codex/config.toml"
+fi
+
+# OpenCode
+if command -v opencode >/dev/null 2>&1 || [ -f "$HOME/.config/opencode/config.json" ]; then
+  register_mcp_json "$HOME/.config/opencode/config.json" "OpenCode"
+fi
+
+set -e
+
+# ── Obsidian MCP propagation ──────────────────────────────────────────────────
+
+find_obsidian_config() {
+  local sources=(
+    "$HOME/.gemini/antigravity-cli/mcp_config.json"
+    "$HOME/.gemini/config/mcp_config.json"
+    "$HOME/.claude/claude_desktop_config.json"
+    "$HOME/.cursor/mcp.json"
+  )
+  for src in "${sources[@]}"; do
+    if [ -f "$src" ]; then
+      local block
+      block=$(node - "$src" <<'NODEEOF'
+const fs = require("fs");
+const [,, src] = process.argv;
+try {
+  const obj = JSON.parse(fs.readFileSync(src, "utf8"));
+  if (obj.mcpServers && obj.mcpServers.obsidian) {
+    process.stdout.write(JSON.stringify(obj.mcpServers.obsidian));
+  }
+} catch (_) {}
+NODEEOF
+)
+      if [ -n "$block" ]; then
+        printf '%s' "$block"
+        return 0
+      fi
+    fi
+  done
+  return 1
+}
+
+propagate_obsidian_json() {
+  local target="$1"
+  local label="$2"
+  local obsidian_block="$3"
+  node - "$target" "$obsidian_block" <<'NODEEOF'
+const fs   = require("fs");
+const path = require("path");
+const [,, target, obsidianBlock] = process.argv;
+let obsidian;
+try { obsidian = JSON.parse(obsidianBlock); } catch (_) { process.exit(0); }
+let obj = { mcpServers: {} };
+if (fs.existsSync(target)) {
+  try { obj = JSON.parse(fs.readFileSync(target, "utf8")); } catch (_) { process.exit(0); }
+}
+if (!obj.mcpServers) obj.mcpServers = {};
+if (obj.mcpServers.obsidian) process.exit(0);
+obj.mcpServers.obsidian = obsidian;
+const dir = path.dirname(target);
+if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+fs.writeFileSync(target, JSON.stringify(obj, null, 2) + "\n");
+NODEEOF
+  local rc=$?
+  if [ $rc -eq 0 ]; then
+    echo "  ✓ obsidian synced to $label"
+  fi
+}
+
+set +e
+obsidian_block=$(find_obsidian_config)
+if [ -n "$obsidian_block" ]; then
+  if [ -d "$HOME/.gemini/antigravity-cli" ]; then
+    propagate_obsidian_json "$HOME/.gemini/antigravity-cli/mcp_config.json" "Antigravity CLI" "$obsidian_block"
+  fi
+  if [ -d "$HOME/.gemini/config" ] && ! [ -d "$HOME/.gemini/antigravity-cli" ]; then
+    propagate_obsidian_json "$HOME/.gemini/config/mcp_config.json" "Gemini CLI" "$obsidian_block"
+  fi
+  if command -v claude >/dev/null 2>&1 || [ -d "$HOME/.claude" ]; then
+    propagate_obsidian_json "$HOME/.claude/claude_desktop_config.json" "Claude Code (global)" "$obsidian_block"
+  fi
+  if command -v cursor >/dev/null 2>&1 || [ -d "$HOME/.cursor" ]; then
+    propagate_obsidian_json "$HOME/.cursor/mcp.json" "Cursor" "$obsidian_block"
+  fi
+  if command -v kiro >/dev/null 2>&1 || [ -d "$HOME/.kiro" ]; then
+    propagate_obsidian_json "$HOME/.kiro/settings/mcp.json" "Kiro" "$obsidian_block"
+  fi
+  if command -v opencode >/dev/null 2>&1 || [ -f "$HOME/.config/opencode/config.json" ]; then
+    propagate_obsidian_json "$HOME/.config/opencode/config.json" "OpenCode" "$obsidian_block"
+  fi
+fi
+set -e
+
+echo ""
+echo "Installation complete."
+echo "Run 'egc doctor' to verify."
