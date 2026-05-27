@@ -25,6 +25,25 @@ if [ "$NODE_MAJOR" -lt 18 ]; then
 fi
 echo "  node $(node --version)"
 
+if ! command -v npm >/dev/null 2>&1; then
+  echo "Error: npm not found. Install Node.js >= 18 (https://nodejs.org)"
+  exit 1
+fi
+echo "  npm $(npm --version)"
+
+if ! command -v npx >/dev/null 2>&1; then
+  echo "Error: npx not found. Install Node.js >= 18 (https://nodejs.org)"
+  exit 1
+fi
+
+# Optional dependency hints (non-blocking)
+if ! command -v uv >/dev/null 2>&1; then
+  echo "  note: uv not found — jira and omega-memory MCP servers require it (https://docs.astral.sh/uv/)"
+fi
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "  note: python3 not found — evalview MCP server requires it"
+fi
+
 if [ "$DRY_RUN" = false ]; then
   # Root dependencies (better-sqlite3 etc.)
   echo "  installing root dependencies..."
@@ -91,6 +110,19 @@ cat > "$ROOT_DIR/.mcp.egc.json" <<EOF
 }
 EOF
 echo "  harness config written to .mcp.egc.json"
+
+# Verify MCP server builds exist
+if [ ! -f "$ROOT_DIR/mcp/servers/egc-guardian/build/index.js" ]; then
+  echo "Error: egc-guardian build missing — run 'cd mcp/servers/egc-guardian && npm run build'"
+  exit 1
+fi
+echo "  ✓ egc-guardian build verified"
+
+if [ ! -f "$ROOT_DIR/mcp/servers/egc-memory/build/index.js" ]; then
+  echo "Error: egc-memory build missing — run 'cd mcp/servers/egc-memory && npm run build'"
+  exit 1
+fi
+echo "  ✓ egc-memory build verified"
 
 # Final validation
 node scripts/egc.js doctor
