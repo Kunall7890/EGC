@@ -118,6 +118,22 @@ async function main() {
     process.exit(0);
   }
 
+  // Resolve symlinks and re-verify containment to prevent symlink escape
+  try {
+    const realScript = fs.realpathSync(scriptPath);
+    const realRoot = fs.realpathSync(resolvedRoot);
+    const realRel = path.relative(realRoot, realScript);
+    if (!realRel || realRel.startsWith('..') || path.isAbsolute(realRel)) {
+      process.stderr.write(`[Hook] Symlink traversal rejected for ${hookId}: ${scriptPath}\n`);
+      process.stdout.write(raw);
+      process.exit(0);
+    }
+  } catch (_) {
+    process.stderr.write(`[Hook] Path resolution failed for ${hookId}: ${scriptPath}\n`);
+    process.stdout.write(raw);
+    process.exit(0);
+  }
+
   // Prefer direct require() when the hook exports a run(rawInput) function.
   // This eliminates one Node.js process spawn (~50-100ms savings per hook).
   //
