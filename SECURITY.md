@@ -32,7 +32,7 @@ Include in your report:
 This policy covers the `everything-gemini` repository, including:
 
 - Core runtime scripts (`scripts/`)
-- MCP server sources (`src/`)
+- MCP server sources (`mcp/servers/`)
 - Installation scripts (`install.sh`, `install.ps1`)
 - Hook and skill definitions (`hooks/`, `skills/`)
 
