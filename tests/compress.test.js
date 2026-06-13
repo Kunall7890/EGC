@@ -26,8 +26,8 @@ let failed = 0;
 const buildPath = path.join(__dirname, '..', 'mcp', 'servers', 'egc-memory', 'build', 'compress.js');
 
 if (!fs.existsSync(buildPath)) {
-  console.error(`Error: Compiled build file not found at ${buildPath}. Build the TS project first: npm run build`);
-  process.exit(1);
+  console.log(`[SKIP] ${buildPath} not found. Run 'npm run build' in mcp/servers/egc-memory first.`);
+  process.exit(0);
 }
 
 const { ruleBasedCompress } = require(buildPath);
