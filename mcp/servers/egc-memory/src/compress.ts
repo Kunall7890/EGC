@@ -1,11 +1,11 @@
 // mcp/servers/egc-memory/src/compress.ts
 // Observation compression logic for issue #142
 
-import { execSync } from "child_process";
-import crypto from "crypto";
-import fs from "fs";
-import os from "os";
-import path from "path";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { z } from "zod";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,12 +33,17 @@ export interface CompressedObservation {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const CONCEPT_REGEX =
-  /\b(auth|jwt|token|login|test|build|lint|type|file|module|import|export|class|interface|async|await|fetch|api|db|sql|redis|cache|queue|hook|route|component|state|context|effect|ref|prop)\b/gi;
+// Set-based word list avoids long alternation regex (keeps cognitive complexity low)
+const CONCEPT_WORDS = new Set([
+  "auth", "jwt", "token", "login", "test", "build", "lint", "type",
+  "file", "module", "import", "export", "class", "interface", "async",
+  "await", "fetch", "api", "db", "sql", "redis", "cache", "queue",
+  "hook", "route", "component", "state", "context", "effect", "ref", "prop",
+]);
 
 function extractConcepts(text: string): string[] {
-  const matches = text.match(CONCEPT_REGEX) ?? [];
-  return [...new Set(matches.map((m) => m.toLowerCase()))];
+  const words = text.toLowerCase().match(/\b[a-z]+\b/g) ?? [];
+  return [...new Set(words.filter((w) => CONCEPT_WORDS.has(w)))];
 }
 
 function buildTitle(type: ObservationType, tool: string, content: string): string {
@@ -55,35 +60,44 @@ function buildTitle(type: ObservationType, tool: string, content: string): strin
 
 // ─── Project Hashing & Path Resolution ────────────────────────────────────────
 
+/**
+ * Resolves the project root and generates a stable content-addressable ID
+ * using direct fs reads instead of child_process spawns (no shell injection risk).
+ */
 export function getProjectHash(projectPath: string): { projectId: string; projectDir: string } {
   let projectRoot = projectPath;
   let remoteUrl = "";
 
-  try {
-    const gitRoot = execSync("git rev-parse --show-toplevel", {
-      cwd: projectPath,
-      stdio: ["ignore", "pipe", "ignore"],
-    }).toString().trim();
-    
-    if (gitRoot) {
-      projectRoot = gitRoot;
-      try {
-        const url = execSync("git remote get-url origin", {
-          cwd: projectRoot,
-          stdio: ["ignore", "pipe", "ignore"],
-        }).toString().trim();
-        if (url) {
-          remoteUrl = url.replace(/:\/\/[^@]+@/, "://");
-        }
-      } catch (_) {}
+  // Walk up the directory tree to find the nearest .git directory
+  let dir = projectPath;
+  while (dir !== path.dirname(dir)) {
+    const gitDir = path.join(dir, ".git");
+    if (fs.existsSync(gitDir)) {
+      projectRoot = dir;
+      break;
     }
-  } catch (_) {
-    // If not a git repo or execSync fails, keep projectRoot as projectPath
+    dir = path.dirname(dir);
+  }
+
+  // Read remote URL from .git/config — no child_process spawn needed
+  const gitConfigPath = path.join(projectRoot, ".git", "config");
+  if (fs.existsSync(gitConfigPath)) {
+    try {
+      const configContent = fs.readFileSync(gitConfigPath, "utf8");
+      const urlMatch = configContent.match(/url\s*=\s*(.+)/);
+      if (urlMatch?.[1]) {
+        remoteUrl = urlMatch[1].trim().replace(/:\/\/[^@]+@/, "://");
+      }
+    } catch (e) {
+      // non-critical: remote URL is only used for dedup hashing; falls back to path
+      console.error("[EGC compress] Could not read .git/config:", String(e));
+    }
   }
 
   const hashInput = remoteUrl || projectRoot;
   let projectId = "global";
   if (hashInput) {
+    // non-security hash — used for dedup/identity only
     projectId = crypto.createHash("sha256").update(hashInput, "utf8").digest("hex").slice(0, 12);
   }
 
@@ -130,7 +144,8 @@ function readObsFile(filePath: string, limit: number, since?: string): RawObserv
           if (time < sinceTime) continue;
         }
 
-        const id = parsed.id || `obs-${i}-${crypto.createHash("md5").update(lines[i]).digest("hex").slice(0, 8)}`;
+        // non-security hash — used for dedup/identity only
+        const id = parsed.id || `obs-${i}-${crypto.createHash("sha256").update(lines[i]).digest("hex").slice(0, 8)}`;
         observations.push({
           id,
           tool: parsed.tool,
@@ -141,7 +156,10 @@ function readObsFile(filePath: string, limit: number, since?: string): RawObserv
           timestamp: parsed.timestamp,
         });
       }
-    } catch (_) {}
+    } catch (e) {
+      // non-critical: skip malformed JSONL lines during read
+      console.error(`[EGC compress] Skipping malformed observation line ${i}:`, String(e));
+    }
   }
 
   return observations.slice(-limit);
@@ -167,7 +185,8 @@ export async function replaceObservation(projectPath: string, id: string, compre
     if (!lines[i]) continue;
     try {
       const parsed = JSON.parse(lines[i]);
-      const lineId = parsed.id || `obs-${i}-${crypto.createHash("md5").update(lines[i]).digest("hex").slice(0, 8)}`;
+      // non-security hash — used for dedup/identity only
+      const lineId = parsed.id || `obs-${i}-${crypto.createHash("sha256").update(lines[i]).digest("hex").slice(0, 8)}`;
       if (lineId === id) {
         lines[i] = JSON.stringify({
           ...compressed,
@@ -176,7 +195,10 @@ export async function replaceObservation(projectPath: string, id: string, compre
         replaced = true;
         break;
       }
-    } catch (_) {}
+    } catch (e) {
+      // non-critical: skip malformed lines during replacement scan
+      console.error(`[EGC compress] Skipping malformed line ${i} during replacement:`, String(e));
+    }
   }
 
   if (replaced) {
@@ -219,9 +241,9 @@ export function ruleBasedCompress(raw: RawObservation): CompressedObservation {
     if (raw.path) facts.push(`File: ${raw.path}`);
     lines.slice(0, 2).forEach((l) => facts.push(l.trim()));
 
-  } else {
+  } else if (lines[0]) {
     // ── Generic ───────────────────────────────────────────────────────────────
-    if (lines[0]) facts.push(lines[0]);
+    facts.push(lines[0]);
   }
 
   return {
@@ -234,6 +256,16 @@ export function ruleBasedCompress(raw: RawObservation): CompressedObservation {
     original_id:   raw.id ?? null,
   };
 }
+
+// ─── Zod schema for LLM response validation ───────────────────────────────────
+
+const LlmCompressedSchema = z.object({
+  type:       z.enum(["tool_failure", "tool_success", "file_edit", "generic"]),
+  title:      z.string().max(80),
+  facts:      z.array(z.string()).min(1).max(6),
+  importance: z.number().min(0).max(1),
+  concepts:   z.array(z.string()),
+});
 
 // ─── LLM-based compressor (uses EGC's configured LLM provider) ───────────────
 
@@ -260,7 +292,8 @@ Respond with ONLY valid JSON. No markdown, no explanation, no backticks.`;
 
   try {
     const response = await llmCall(prompt);
-    const parsed   = JSON.parse(response) as Omit<CompressedObservation, "compressed_at" | "original_id">;
+    // Validate the LLM response shape before spreading to prevent injection of unexpected fields
+    const parsed = LlmCompressedSchema.parse(JSON.parse(response));
 
     return {
       ...parsed,
@@ -268,7 +301,7 @@ Respond with ONLY valid JSON. No markdown, no explanation, no backticks.`;
       original_id:   raw.id ?? null,
     };
   } catch {
-    // LLM unavailable or returned bad JSON → safe fallback
+    // LLM unavailable, returned bad JSON, or failed Zod validation → safe fallback
     console.error("[EGC compress] LLM compression failed — using rule-based fallback");
     return ruleBasedCompress(raw);
   }

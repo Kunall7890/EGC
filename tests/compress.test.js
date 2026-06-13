@@ -4,9 +4,9 @@
  * Run with: node tests/compress.test.js
  */
 
-const assert = require('assert');
-const path = require('path');
-const fs = require('fs');
+const assert = require('node:assert');
+const path = require('node:path');
+const fs = require('node:fs');
 
 function test(name, fn) {
   try {
@@ -88,7 +88,7 @@ if (
 
 if (
   test('caps facts at 6 for long outputs', () => {
-    const longOutput = Array(20).fill('Error: something went wrong at line X').join('\n');
+    const longOutput = new Array(20).fill('Error: something went wrong at line X').join('\n');
     const result = ruleBasedCompress({
       tool: 'bash',
       output: longOutput,
