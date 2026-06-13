@@ -20,6 +20,7 @@ import {
   listWorkingMemory,
 } from './working-memory';
 import { detectPatternsFromEvents, patternToStoreEntry } from './patterns.js';
+import { ruleBasedCompress, loadRawObservations, replaceObservation } from './compress.js';
 
 // Mirrors DEFAULT_STATE_STORE_RELATIVE_PATH from scripts/lib/state-store/index.js
 const STATE_STORE_RELATIVE_PATH = path.join('.gemini', 'egc', 'state.db');
@@ -488,6 +489,12 @@ const DetectPatternsSchema = z.object({
   min_occurrences: z.number().min(2).max(1000).optional().default(3)
 });
 
+const CompressObservationsSchema = z.object({
+  project_path: z.string().optional(),
+  since: z.string().optional(),
+  limit: z.number().min(1).max(500).optional().default(50)
+});
+
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
@@ -602,6 +609,27 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             window_days: { type: "number", description: "Number of past days to analyze. Defaults to 7." },
             min_occurrences: { type: "number", description: "Minimum times a pattern must appear to be reported. Defaults to 3." }
+          }
+        }
+      },
+      {
+        name: "compress_observations",
+        description: "Compress recent raw hook observations into structured typed summaries. Reduces token usage for context injection. Returns count + summary of compressed items.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            project_path: {
+              type: "string",
+              description: "Absolute path to the project root. Defaults to current working directory."
+            },
+            since: {
+              type: "string",
+              description: "ISO 8601 timestamp — only compress observations newer than this. Optional."
+            },
+            limit: {
+              type: "number",
+              description: "Max number of raw observations to process. Default: 50."
+            }
           }
         }
       }
@@ -909,6 +937,48 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             type: "text",
             text: JSON.stringify({ success: true, data: { patterns: output }, meta: { window_days, min_occurrences, events_analyzed: events.length } }, null, 2)
           }]
+        };
+      }
+
+      case "compress_observations": {
+        const args = CompressObservationsSchema.parse(request.params.arguments || {});
+        const projPath = resolveProjectPath(args.project_path);
+
+        const rawObservations = await loadRawObservations(projPath, args.limit, args.since);
+
+        if (rawObservations.length === 0) {
+          return {
+            content: [{ type: "text", text: "No raw observations found to compress." }],
+          };
+        }
+
+        const compressed = await Promise.all(
+          rawObservations.map(async (raw) => {
+            return ruleBasedCompress(raw);
+          })
+        );
+
+        await Promise.all(
+          compressed.map((c, i) => replaceObservation(projPath, rawObservations[i].id!, c))
+        );
+
+        const summary = compressed.map((c) => ({
+          title:      c.title,
+          type:       c.type,
+          importance: c.importance,
+        }));
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                { compressed_count: compressed.length, summary },
+                null,
+                2
+              ),
+            },
+          ],
         };
       }
 
