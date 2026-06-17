@@ -20,10 +20,9 @@ Read the returned Markdown. It contains the decisions already made, what failed,
 
 ## At the end of every session
 
-> ⚠️ **COMPACTION RULE — READ FIRST**
-> NEVER create files inside `Arquivados/Compactações/` during compaction.
-> On `/compact`: ONLY update `Estado Atual.md` (max 30 lines) + `~/.egc/state/<project>.md` via `update_state`.
-> Creating new vault files on compaction is incorrect and generates dozens of spurious files per session.
+> **COMPACTION RULE:** On `/compact`, call `update_state` to persist session state.
+> Do not create new files anywhere — not in the project, not in any external vault or notebook.
+> `update_state` merges into an existing state file; no new files are ever needed.
 
 ---
 
